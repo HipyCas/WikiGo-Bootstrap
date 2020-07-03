@@ -1,0 +1,14 @@
+<html>
+  <head>
+    {{ template "cdn"}}
+    {{ template "meta"}}
+    <title>{{.Title}}</title>
+  </head>
+  <body>
+    <h1>Editing {{.Title}}</h1>
+    <form action="/save/{{.Title}}" method="POST">
+      <div class="form-group"><textarea class="form-control" name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
+      <div class="form-group"><input type="submit" value="Save"></div>
+    </form>
+  </body>
+</html>
