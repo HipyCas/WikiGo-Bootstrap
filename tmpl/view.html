@@ -7,10 +7,8 @@
   <body>
     <div class="container">
       <h1>{{.Title}}</h1>
-      <div class="btn-group" data-toggle="buttons">
-        <button href="/edit/{{.Title}}" type="button" class="btn btn-outline-primary btn-sm">Edit</button>
-        <button href="/download/{{.Title}}" type="button" class="btn btn-outline-secondary btn-sm">Download</button>
-      </div>
+      <a href="/edit/{{.Title}}" type="button" class="btn btn-outline-primary btn-sm">Edit</a>
+      <a href="/download/{{.Title}}" type="button" class="btn btn-outline-secondary btn-sm">Download</a>
       <hr>
       <!--<p>[<a href="/edit/{{.Title}}">edit</a>]</p>-->
       <div>{{printf "%s" .Body}}</div>
