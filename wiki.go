@@ -74,6 +74,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
     fmt.Println("Username: ", r.Form["username"])
     fmt.Println("Password: ", r.Form["password"])
+    http.Redirect(w, r, "/view/TestPage", http.StatusFound)
   }
 }
 
