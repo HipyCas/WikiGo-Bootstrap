@@ -1,7 +1,7 @@
 package main
 
 import (
-  //"fmt"
+  "fmt"
   "regexp"
   "io/ioutil"
   "log"
@@ -10,12 +10,20 @@ import (
   "html/template"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html"))
+var pageTemplates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html"))
+var otherTemplates = template.Must(template.ParseFiles("tmpl/login.html"))
 
-var validPath = regexp.MustCompile("^/(view|edit|save)/([a-zA-Z0-9]+)$")
+var pagePath = regexp.MustCompile("^/(view|edit|save)/([a-zA-Z0-9]+)$")
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl + ".html", p)
+func renderTemplate(w http.ResponseWriter, tmpl string) {
+  err := otherTemplates.ExecuteTemplate(w, tmpl+".html", nil)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+}
+
+func renderPageTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	err := pageTemplates.ExecuteTemplate(w, tmpl + ".html", p)
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //return
@@ -23,7 +31,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 }
 
 func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
-  m := validPath.FindStringSubmatch(r.URL.Path)
+  m := pagePath.FindStringSubmatch(r.URL.Path)
   if m == nil {
     http.NotFound(w, r)
     return "", errors.New("Invalid Page Title")
@@ -37,7 +45,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string)  {
     http.Redirect(w, r, "/edit/" + title, http.StatusFound)
     return
   }
-	renderTemplate(w, "view", p)
+	renderPageTemplate(w, "view", p)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -45,7 +53,7 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
   if err != nil {
     p = &Page{Title: title}
   }
-  renderTemplate(w, "edit", p)
+  renderPageTemplate(w, "edit", p)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -60,9 +68,19 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
   http.Redirect(w, r, "/view/" + title, http.StatusFound)
 }
 
+func loginHandler(w http.ResponseWriter, r *http.Request, title string) {
+  if r.Method == "GET" {
+    renderTemplate(w, "login")
+  } else {
+    r.ParseForm()
+    fmt.Println("Username: ", r.Form["username"])
+    fmt.Println("Password: ", r.Form["password"])
+  }
+}
+
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
-    m := validPath.FindStringSubmatch(r.URL.Path)
+    m := pagePath.FindStringSubmatch(r.URL.Path)
     if m == nil {
       http.NotFound(w, r)
       return
