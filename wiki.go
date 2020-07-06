@@ -119,3 +119,22 @@ func loadPage(title string) (*Page, error) {
   }
   return &Page{Title: title, Body: body}, nil
 }
+
+type Alert struct {
+  Level int
+  Msg string
+}
+
+var alerts [5]Alert
+
+func getAlerts() []Alert {
+  toReturn := []Alert{}
+  for i := 0; i < len(alerts); i++ {
+    if alerts[i].Level == -1 {
+      break
+    }
+    toReturn = append(toReturn, alerts[i])
+    alerts[i] = Alert{-1, ""}
+  }
+  return toReturn
+}
