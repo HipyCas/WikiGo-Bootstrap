@@ -72,8 +72,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
     renderTemplate(w, "login")
   } else {
     r.ParseForm()
-    fmt.Println("Username: ", r.Form["username"])
-    fmt.Println("Password: ", r.Form["password"])
+    if m, _ := regexp.MatchString("^[a-zA-Z0-9]+$", r.Form.Get("username")); !m {
+      fmt.Println("Username: ", template.HTMLEscapeString(r.Form["username"][0]))
+    }
+    if n, _ := regexp.MatchString("^[a-zA-Z0-9$%&]+$", r.Form.Get("password")); !n {
+      fmt.Println("Password: ", template.HTMLEscapeString(r.Form["password"][0]))
+    }
     http.Redirect(w, r, "/view/TestPage", http.StatusFound)
   }
 }
