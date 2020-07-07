@@ -152,6 +152,15 @@ func addAlert(alert Alert) error {
   return nil
 }
 
+func addAlertCreate(lvl int, msg string) (Alert, error) {
+  if lvl < 0 || lvl > 7 {
+    return Alert{Level: -1, Msg: ""}, &InvalidAlertLevel{Lvl: lvl}
+  }
+  a := Alert{Level: lvl, Msg: msg}
+  alerts = append(alerts, a)
+  return a, nil
+}
+
 func getAlerts() []Alert {
   toReturn := []Alert{}
   for i := 0; i < len(alerts); i++ {
