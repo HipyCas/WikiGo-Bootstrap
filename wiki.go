@@ -134,7 +134,14 @@ type Alert struct {
   Msg string
 }
 
-var alerts [5]Alert
+var alerts []Alert
+
+func addAlert(alert Alert) {
+  if alert.Level < 0 || alert.Level > 7 {
+    panic("Invalid level for alert")
+  }
+  alerts = append(alerts, alert)
+}
 
 func getAlerts() []Alert {
   toReturn := []Alert{}
