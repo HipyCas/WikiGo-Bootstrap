@@ -2,15 +2,15 @@
   <head>
     {{ template "cdn"}}
     {{ template "meta"}}
-    <title>{{.Title}}</title>
+    <title>{{ .WikiPage.Title }}</title>
   </head>
   <body>
     <div class="container">
       {{ template "alerts" }}
-      <h1>Editing {{.Title}}</h1>
+      <h1>Editing {{ .WikiPage.Title }}</h1>
       <hr>
       <form action="/save/{{.Title}}" method="POST">
-        <div class="form-group"><textarea class="form-control" name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
+        <div class="form-group"><textarea class="form-control" name="body" rows="20" cols="80">{{ printf "%s" .WikiPage.Body }}</textarea></div>
         <div class="form-group"><input class="form-control btn btn-primary" type="submit" value="Save"></div>
       </form>
     </div>

@@ -2,17 +2,17 @@
   <head>
     {{ template "cdn" }}
     {{ template "meta"}}
-    <title>{{.Title}}</title>
+    <title>{{ .WikiPage.Title }}</title>
   </head>
   <body>
     <div class="container">
       {{ template "alerts" }}
-      <h1>{{.Title}}</h1>
+      <h1>{{ .WikiPage.Title }}</h1>
       <a href="/edit/{{.Title}}" type="button" class="btn btn-outline-primary btn-sm">Edit</a>
       <a href="/download/{{.Title}}" type="button" class="btn btn-outline-secondary btn-sm">Download</a>
       <hr>
       <!--<p>[<a href="/edit/{{.Title}}">edit</a>]</p>-->
-      <div>{{printf "%s" .Body}}</div>
+      <div>{{ printf "%s" .WikiPage.Body }}</div>
     </div>
   </body>
 </html>
