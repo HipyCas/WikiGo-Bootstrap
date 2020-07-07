@@ -136,11 +136,20 @@ type Alert struct {
 
 var alerts []Alert
 
-func addAlert(alert Alert) {
+type InvalidAlertLevel struct {
+  Lvl int
+}
+
+func (e *InvalidAlertLevel) Error() string {
+  return fmt.Sprintf("Invalid alert level: %d", e.Lvl)
+}
+
+func addAlert(alert Alert) error {
   if alert.Level < 0 || alert.Level > 7 {
-    panic("Invalid level for alert")
+    return &InvalidAlertLevel{Lvl: alert.Level}
   }
   alerts = append(alerts, alert)
+  return nil
 }
 
 func getAlerts() []Alert {
