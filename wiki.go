@@ -13,6 +13,11 @@ var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.
 
 var pagePath = regexp.MustCompile("^/(view|edit|save)/([a-zA-Z0-9]+)$")
 
+type ViewData struct {
+  Alerts []Alert
+  WikiPage Page
+}
+
 func renderTemplate(w http.ResponseWriter, tmpl string) {
   err := templates.ExecuteTemplate(w, tmpl+".html", nil)
   if err != nil {
