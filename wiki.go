@@ -9,24 +9,28 @@ import (
   "html/template"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html"))
+var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
 
 var pagePath = regexp.MustCompile("^/(view|edit|save)/([a-zA-Z0-9]+)$")
 
 type ViewData struct {
   Alerts []Alert
-  WikiPage Page
+}
+
+type PageViewData struct {
+  Alerts []Alert
+  WikiPage *Page
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string) {
-  err := templates.ExecuteTemplate(w, tmpl+".html", nil)
+  err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts()})
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
   }
 }
 
 func renderPageTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl + ".html", p)
+	err := templates.ExecuteTemplate(w, tmpl + ".html", PageViewData{Alerts: getAlerts(), WikiPage: p})
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //return
