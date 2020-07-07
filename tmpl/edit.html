@@ -6,6 +6,7 @@
   </head>
   <body>
     <div class="container">
+      {{ template "alerts" }}
       <h1>Editing {{.Title}}</h1>
       <hr>
       <form action="/save/{{.Title}}" method="POST">

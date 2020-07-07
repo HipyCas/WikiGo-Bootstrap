@@ -6,6 +6,7 @@
   </head>
   <body>
     <div class="container">
+      {{ template "alerts" }}
       <h1>{{.Title}}</h1>
       <a href="/edit/{{.Title}}" type="button" class="btn btn-outline-primary btn-sm">Edit</a>
       <a href="/download/{{.Title}}" type="button" class="btn btn-outline-secondary btn-sm">Download</a>
