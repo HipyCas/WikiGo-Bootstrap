@@ -9,19 +9,28 @@ import (
   "html/template"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html"))
+var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
 
 var pagePath = regexp.MustCompile("^/(view|edit|save)/([a-zA-Z0-9]+)$")
 
+type ViewData struct {
+  Alerts []Alert
+}
+
+type PageViewData struct {
+  Alerts []Alert
+  WikiPage *Page
+}
+
 func renderTemplate(w http.ResponseWriter, tmpl string) {
-  err := templates.ExecuteTemplate(w, tmpl+".html", nil)
+  err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts()})
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
   }
 }
 
 func renderPageTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl + ".html", p)
+	err := templates.ExecuteTemplate(w, tmpl + ".html", PageViewData{Alerts: getAlerts(), WikiPage: p})
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //return
@@ -118,4 +127,48 @@ func loadPage(title string) (*Page, error) {
     return nil, err
   }
   return &Page{Title: title, Body: body}, nil
+}
+
+type Alert struct {
+  Level int
+  Msg string
+}
+
+var alerts []Alert
+
+type InvalidAlertLevel struct {
+  Lvl int
+}
+
+func (e *InvalidAlertLevel) Error() string {
+  return fmt.Sprintf("Invalid alert level: %d", e.Lvl)
+}
+
+func addAlert(alert Alert) error {
+  if alert.Level < 0 || alert.Level > 7 {
+    return &InvalidAlertLevel{Lvl: alert.Level}
+  }
+  alerts = append(alerts, alert)
+  return nil
+}
+
+func addAlertCreate(lvl int, msg string) (Alert, error) {
+  if lvl < 0 || lvl > 7 {
+    return Alert{Level: -1, Msg: ""}, &InvalidAlertLevel{Lvl: lvl}
+  }
+  a := Alert{Level: lvl, Msg: msg}
+  alerts = append(alerts, a)
+  return a, nil
+}
+
+func getAlerts() []Alert {
+  toReturn := []Alert{}
+  for i := 0; i < len(alerts); i++ {
+    if alerts[i].Level == -1 {
+      break
+    }
+    toReturn = append(toReturn, alerts[i])
+    alerts[i] = Alert{-1, ""}
+  }
+  return toReturn
 }
