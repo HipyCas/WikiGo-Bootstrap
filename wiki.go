@@ -87,6 +87,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
     if n, _ := regexp.MatchString("^[a-zA-Z0-9$%&]+$", r.Form.Get("password")); !n {
       fmt.Println("Password: ", template.HTMLEscapeString(r.Form["password"][0]))
     }
+    addAlertCreate(3, "Succesful login")
     http.Redirect(w, r, "/view/TestPage", http.StatusFound)
   }
 }
@@ -131,6 +132,14 @@ func loadPage(title string) (*Page, error) {
 
 type Alert struct {
   Level int
+  Primary bool
+  Secondary bool
+  Info bool
+  Succes bool
+  Warning bool
+  Danger bool
+  Light bool
+  Dark bool
   Msg string
 }
 
@@ -154,9 +163,19 @@ func addAlert(alert Alert) error {
 
 func addAlertCreate(lvl int, msg string) (Alert, error) {
   if lvl < 0 || lvl > 7 {
-    return Alert{Level: -1, Msg: ""}, &InvalidAlertLevel{Lvl: lvl}
+    return Alert{}, &InvalidAlertLevel{Lvl: lvl}
   }
   a := Alert{Level: lvl, Msg: msg}
+  switch lvl {
+    case 0:
+      a.Primary = true
+      break
+    case 1:
+      a.Secondary = true
+      break
+    case 2:
+      a.Info = true
+  }
   alerts = append(alerts, a)
   return a, nil
 }
@@ -168,7 +187,7 @@ func getAlerts() []Alert {
       break
     }
     toReturn = append(toReturn, alerts[i])
-    alerts[i] = Alert{-1, ""}
+    alerts[i] = Alert{}
   }
   return toReturn
 }
