@@ -1,18 +1,21 @@
-<div>
-  {{ range .Alerts }}
-    {{ if .Primary}}
-       <div class="alert alert-primary alert-dismissible fade show">
-         <button class="close" type="button">
-           <span aria-hidden="true"></span>
-         </button>
-       </div>
-     {{ end }}
-     {{if .Secondary }}<div class="alert alert-secondary alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-     {{if .Info }}<div class="alert alert-info alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-     {{if .Succes}}<div class="alert alert-succes alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-     {{if .Warning}}<div class="alert alert-warning alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-     {{if .Danger}<div class="alert alert-danger alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-     {{if .Light}}<div class="alert alert-light alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-     {{if .Dark}}<div class="alert alert-dark alert-dismissible fade show"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
-  {{ end }}
-</div>
+{{ define "alerts" }}
+  <div>
+    {{ range .Alerts }}
+      {{ if .Primary}}
+         <div class="alert alert-primary alert-dismissible fade show">
+           {{ .Msg }}
+           <button class="close" type="button">
+             <span aria-hidden="true">&times;</span>
+           </button>
+         </div>
+       {{ end }}
+       {{if .Secondary }}<div class="alert alert-secondary alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+       {{if .Info }}<div class="alert alert-info alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+       {{if .Success}}<div class="alert alert-success alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+       {{if .Warning}}<div class="alert alert-warning alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+       {{if .Danger}}<div class="alert alert-danger alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+       {{if .Light}}<div class="alert alert-light alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+       {{if .Dark}}<div class="alert alert-dark alert-dismissible fade show">{{ .Msg }}<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>{{end}}
+    {{ end }}
+  </div>
+{{ end }}

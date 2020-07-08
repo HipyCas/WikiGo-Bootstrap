@@ -7,12 +7,13 @@
   </head>
   <body>
     <div class="container">
-      {{ template "alerts" }}
+      <br>{{ template "alerts" . }}
       <h1>Login</h1><hr>
       <form action="" method="POST" class="form-group">
         <input class="form-control" type="text" name="username" placeholder="Username" required><br>
         <input class="form-control" type="password" name="password" placeholder="Password" required><br>
         <input class="form-control btn btn-primary" type="submit" name="submit" value="Login"><br>
+        <input type="number" name="n">
       </form>
     </div>
   </body>
