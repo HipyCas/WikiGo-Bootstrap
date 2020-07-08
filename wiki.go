@@ -72,8 +72,11 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		addAlertCreate(5, "Something went wrong and the page wasn't saved")
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		//return
+	} else {
+		addAlertCreate(3, "Page succesfully saved")
 	}
 	//log.Println("Page " + p.title + " succesfully")
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
