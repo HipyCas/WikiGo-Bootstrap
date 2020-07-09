@@ -141,23 +141,28 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil
 }
 
+/*ALERT STRUCT
+An alert is a message or notification that appears on top of the page in the Bootstrap alert style, this struct represents one of it.
+*/
 type Alert struct {
-	Level     int
-	Primary   bool
-	Secondary bool
-	Info      bool
-	Success   bool
-	Warning   bool
-	Danger    bool
-	Light     bool
-	Dark      bool
-	Msg       string
+	Level     int    // The level of the alert (between 0 and 7) indicated as int
+	Primary   bool   // If the alert is of type primary
+	Secondary bool   // If the alert is of type secondary
+	Info      bool   // If the alert is of type info
+	Success   bool   // If the alert is of type success
+	Warning   bool   // If the alert is of type warning
+	Danger    bool   // If the alert is of type danger
+	Light     bool   // If the alert is of type light
+	Dark      bool   // If the alert is of type dark
+	Msg       string // Message/Payload of the alert
 }
 
+//Slice to store the active alerts
 var alerts []Alert
 
+//Error thrown when a alert level is not valid (lower than 0 or higher than 7)
 type InvalidAlertLevel struct {
-	Lvl int
+	Lvl int // The not valid level that was given to the alert
 }
 
 func (e *InvalidAlertLevel) Error() string {
