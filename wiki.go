@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 	"unicode/utf8"
@@ -17,23 +19,25 @@ var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.
 var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
 type ViewData struct {
-	Alerts []Alert
+	Alerts      []Alert
+	CurrentUser *User
 }
 
 type PageViewData struct {
-	Alerts   []Alert
-	WikiPage *Page
+	Alerts      []Alert
+	CurrentUser *User
+	WikiPage    *Page
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts()})
+	err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts(), CurrentUser: &currentUser})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func renderPageTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	view := PageViewData{Alerts: getAlerts(), WikiPage: p}
+	view := PageViewData{Alerts: getAlerts(), CurrentUser: &currentUser, WikiPage: p}
 	err := templates.ExecuteTemplate(w, tmpl+".html", view)
 	log.Println(view)
 	if err != nil {
@@ -103,12 +107,38 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		if m, _ := regexp.MatchString("^[a-zA-Z0-9$%&]+$", r.Form.Get("password")); !m {
 			fmt.Println("Password: ", template.HTMLEscapeString(r.Form["password"][0]))
 		}
+		file, err := os.Open("user/" + r.Form["username"][0] + ".xml")
+		if err != nil {
+			log.Printf("Error while openng user/%s.xml: %v", r.Form["username"][0], err)
+			addAlertCreate(5, "Username not found")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/login/", http.StatusFound)
+			return
+		}
+		defer file.Close()
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Printf("Error while reading data from user/%s.xml: %v", r.Form["username"][0], err)
+			addAlertCreate(5, "Internal error with login")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
+			return
+		}
+		er := xml.Unmarshal(data, &currentUser)
+		if er != nil {
+			log.Printf("Error while parsing xml user/%s.xml: %v", r.Form["username"][0], er)
+			addAlertCreate(5, "Internal error with login")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
+			return
+		}
 		addAlertCreate(3, "Succesful login")
-		addAlertCreate(2, "Logged in as user: "+r.Form["username"][0])
+		addAlertCreate(2, "Logged in as user: "+currentUser.Username)
 		if utf8.RuneCountInString(r.Form["password"][0]) < 5 {
 			addAlertCreate(4, "Your password is too weak")
 		}
 		//log.Printf("Created alert: %s", a.Msg)
+		log.Print(currentUser)
 		http.Redirect(w, r, "/view/TestPage", http.StatusFound)
 	}
 }
@@ -226,3 +256,34 @@ func removeAlert(index int) {
 	alerts[index] = alerts[len(alerts)-1]
 	alerts = alerts[:len(alerts)-1]
 }
+
+var currentUser User = User{}
+
+type User struct {
+	Username     string  `xml:"username"`
+	Password     string  `xml:"password"`
+	Name         string  `xml:"name"`
+	LastName     string  `xml:"lastName"`
+	Email        string  `xml:"email"`
+	PhoneNumber  string  `xml:"phoneNumber"`
+	Address      Address `xml:"address"`
+	Language     string  `xml:"language"`
+	LanguageCode string  `xml:"languageCode"`
+	Country      string  `xml:"country"`
+	CountryCode  string  `xml:"countryCode"`
+	About        []byte  `xml:"about"`
+	Config       Config  `xml:"config"`
+	Other        []byte  `xml:",any"`
+	Comments     []byte  `xml:",comments"`
+}
+
+type Address struct {
+	Number   string `xml:"number"`
+	Street   string `xml:"streer"`
+	City     string `xml:"city"`
+	Zip      string `xml:"zip"`
+	Province string `xml:"province"`
+	Country  string `xml:"country"`
+}
+
+type Config struct{}
