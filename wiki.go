@@ -266,7 +266,7 @@ type User struct {
 	LastName    string `xml:"lastName"`
 	Email       string `xml:"email"`
 	PhoneNumber string `xml:"phoneNumber"`
-	Address     Adress `xml:"adress"`
+	Address     Adress `xml:"address"`
 	Language    string `xml:"lang"`
 	About       []byte `xml:"about"`
 	Config      Config `xml:"config"`
@@ -274,7 +274,7 @@ type User struct {
 	Comments    []byte `xml:",comments"`
 }
 
-type Adress struct {
+type Address struct {
 	Number   string `xml:"number"`
 	Street   string `xml:"streer"`
 	City     string `xml:"city"`
