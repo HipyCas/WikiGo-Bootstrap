@@ -13,5 +13,7 @@
     <province>Ontario</province>
     <country>Canada</country>
   </adress>
+  <lang>en</lang>
   <about>Hey this is a simple user to do some testing</about>
+  <config></config>
 </user>
