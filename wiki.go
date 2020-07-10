@@ -226,3 +226,11 @@ func removeAlert(index int) {
 	alerts[index] = alerts[len(alerts)-1]
 	alerts = alerts[:len(alerts)-1]
 }
+
+type User struct {
+	Username    string
+	Name        string
+	LastName    string
+	Email       string
+	PhoneNumber string
+}
