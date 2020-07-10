@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
+var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
 
 var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
@@ -148,7 +148,7 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "register")
 	} else {
 		r.ParseForm()
-		err := isValidPassword(r.Form["password"][0])
+		err := isValidPassword(r.Form.Get("password"))
 		if err != nil {
 			log.Printf("The password %s is not valid: %v", r.Form["password"][0], err)
 			addAlertCreate(5, err.Error())
@@ -202,6 +202,7 @@ func main() {
 	http.HandleFunc("/save/", makePageHandler(saveHandler))
 	http.HandleFunc("/download/", makePageHandler(downloadHandler))
 	http.HandleFunc("/login/", loginHandler)
+	http.HandleFunc("/register/", registerHandle)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -332,5 +333,8 @@ type Address struct {
 type Config struct{}
 
 func isValidPassword(password string) error {
-	return fmt.Errorf("lol %s", password)
+	if password == "lol" {
+		return fmt.Errorf("lol %s", password)
+	}
+	return nil
 }
