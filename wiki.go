@@ -228,9 +228,20 @@ func removeAlert(index int) {
 }
 
 type User struct {
-	Username    string
-	Name        string
-	LastName    string
-	Email       string
-	PhoneNumber string
+	Username    string `xml:"username"`
+	Name        string `xml:"name"`
+	LastName    string `xml:"lastName"`
+	Email       string `xml:"email"`
+	PhoneNumber string `xml:"phoneNumber"`
+	Address     Adress `xml:"adress"`
+	About       []byte `xml:"about"`
+}
+
+type Adress struct {
+	Number   string `xml:"number"`
+	Street   string `xml:"streer"`
+	City     string `xml:"city"`
+	Zip      string `xml:"zip"`
+	Province string `xml:"province"`
+	Country  string `xml:"country"`
 }
