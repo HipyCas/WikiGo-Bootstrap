@@ -1,7 +1,7 @@
 <user>
   <username>TestUser</username>
   <password>nu3rn4er4o5n43n53nrn457ehf734eyh</password>
-  <name>User</name>
+  <firstName>User</firstName>
   <lastName>Test</lastName>
   <email>testuser@example.com</email>
   <phoneNumber>984321432</phoneNumber>

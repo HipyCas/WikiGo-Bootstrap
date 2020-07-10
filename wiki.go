@@ -143,6 +143,48 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func registerHandle(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		renderTemplate(w, "register")
+	} else {
+		r.ParseForm()
+		err := isValidPassword(r.Form["password"][0])
+		if err != nil {
+			log.Printf("The password %s is not valid: %v", r.Form["password"][0], err)
+			addAlertCreate(5, err.Error())
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+			return
+		}
+		user := User{Username: r.Form.Get("username"), FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"), Password: r.Form.Get("password"), Email: r.Form.Get("email"), PhoneNumber: r.Form.Get("phoneNumber") Country: r.Form.Get("country")}
+		out, err := xml.MarshalIndent(user, " ", "\t")
+		if err != nil {
+			log.Printf("Error when generating XML for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		_, err = os.Stdout.Write([]byte(xml.Header))
+		if err != nil {
+			log.Printf("Error when saving XML for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		_, err = os.Stdout.Write(out)
+		if err != nil {
+			log.Printf("Error when writing XML for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/login/", http.StatusFound)
+	}
+}
+
 func makePageHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := pagePath.FindStringSubmatch(r.URL.Path)
@@ -260,21 +302,22 @@ func removeAlert(index int) {
 var currentUser User = User{}
 
 type User struct {
-	Username     string  `xml:"username"`
-	Password     string  `xml:"password"`
-	Name         string  `xml:"name"`
-	LastName     string  `xml:"lastName"`
-	Email        string  `xml:"email"`
-	PhoneNumber  string  `xml:"phoneNumber"`
-	Address      Address `xml:"address"`
-	Language     string  `xml:"language"`
-	LanguageCode string  `xml:"languageCode"`
-	Country      string  `xml:"country"`
-	CountryCode  string  `xml:"countryCode"`
-	About        []byte  `xml:"about"`
-	Config       Config  `xml:"config"`
-	Other        []byte  `xml:",any"`
-	Comments     []byte  `xml:",comments"`
+	XMLName      xml.Name `xml:"user"`
+	Username     string   `xml:"username"`
+	Password     string   `xml:"password"`
+	FirstName    string   `xml:"firstName"`
+	LastName     string   `xml:"lastName"`
+	Email        string   `xml:"email"`
+	PhoneNumber  string   `xml:"phoneNumber"`
+	Address      Address  `xml:"address"`
+	Language     string   `xml:"language"`
+	LanguageCode string   `xml:"languageCode"`
+	Country      string   `xml:"country"`
+	CountryCode  string   `xml:"countryCode"`
+	About        []byte   `xml:"about"`
+	Config       Config   `xml:"config"`
+	Other        []byte   `xml:",any"`
+	Comments     []byte   `xml:",comments"`
 }
 
 type Address struct {
@@ -287,3 +330,7 @@ type Address struct {
 }
 
 type Config struct{}
+
+func isValidPassword(password string) error {
+	return fmt.Errorf("lol %s", password)
+}
