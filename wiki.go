@@ -156,7 +156,7 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
-		user := User{Username: r.Form.Get("username"), FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"), Password: r.Form.Get("password"), Email: r.Form.Get("email"), PhoneNumber: r.Form.Get("phoneNumber") Country: r.Form.Get("country")}
+		user := User{Username: r.Form.Get("username"), FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"), Password: r.Form.Get("password"), Email: r.Form.Get("email"), PhoneNumber: r.Form.Get("phoneNumber"), Country: r.Form.Get("country")}
 		out, err := xml.MarshalIndent(user, " ", "\t")
 		if err != nil {
 			log.Printf("Error when generating XML for user %v: %v", user, err)
