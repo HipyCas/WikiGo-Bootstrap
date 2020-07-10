@@ -111,20 +111,26 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Error while openng user/%s.xml: %v", r.Form["username"][0], err)
 			addAlertCreate(5, "Username not found")
-			http.Redirect(w, r, "/login/", http.StatusContinue)
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/login/", http.StatusFound)
+			return
 		}
 		defer file.Close()
 		data, err := ioutil.ReadAll(file)
 		if err != nil {
 			log.Printf("Error while reading data from user/%s.xml: %v", r.Form["username"][0], err)
 			addAlertCreate(5, "Internal error with login")
+			r.Header.Set("Method", "GET")
 			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
+			return
 		}
 		er := xml.Unmarshal(data, &currentUser)
 		if er != nil {
 			log.Printf("Error while parsing xml user/%s.xml: %v", r.Form["username"][0], er)
 			addAlertCreate(5, "Internal error with login")
+			r.Header.Set("Method", "GET")
 			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
+			return
 		}
 		addAlertCreate(3, "Succesful login")
 		addAlertCreate(2, "Logged in as user: "+currentUser.Username)
