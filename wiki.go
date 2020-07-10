@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 	"unicode/utf8"
@@ -105,8 +107,24 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		if m, _ := regexp.MatchString("^[a-zA-Z0-9$%&]+$", r.Form.Get("password")); !m {
 			fmt.Println("Password: ", template.HTMLEscapeString(r.Form["password"][0]))
 		}
+		file, err = os.Open("users/" + r.Form["username"][0] + ".xml")
+		if err != nil {
+			log.Printf("Error while openng users/%s.xml: %v", r.Form["username"][0], err)
+			return
+		}
+		defer file.Close()
+		data, err = ioutil.ReadAll(file)
+		if err != nil {
+			log.Printf("Error while reading data from users/%s.xml: %v", r.Form["username"][0], err)
+			return
+		}
+		err = xml.Unmarshal(data, &currentUser)
+		if err != nil {
+			log.Printf("Error while parsing xml users/%s.xml: %v", r.Form["username"][0], err)
+			return
+		}
 		addAlertCreate(3, "Succesful login")
-		addAlertCreate(2, "Logged in as user: "+r.Form["username"][0])
+		addAlertCreate(2, "Logged in as user: "+currentUser.Username)
 		if utf8.RuneCountInString(r.Form["password"][0]) < 5 {
 			addAlertCreate(4, "Your password is too weak")
 		}
