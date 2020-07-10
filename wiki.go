@@ -107,21 +107,24 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		if m, _ := regexp.MatchString("^[a-zA-Z0-9$%&]+$", r.Form.Get("password")); !m {
 			fmt.Println("Password: ", template.HTMLEscapeString(r.Form["password"][0]))
 		}
-		file, err := os.Open("users/" + r.Form["username"][0] + ".xml")
+		file, err := os.Open("user/" + r.Form["username"][0] + ".xml")
 		if err != nil {
-			log.Printf("Error while openng users/%s.xml: %v", r.Form["username"][0], err)
-			return
+			log.Printf("Error while openng user/%s.xml: %v", r.Form["username"][0], err)
+			addAlertCreate(5, "Username not found")
+			http.Redirect(w, r, "/login/", http.StatusContinue)
 		}
 		defer file.Close()
 		data, err := ioutil.ReadAll(file)
 		if err != nil {
-			log.Printf("Error while reading data from users/%s.xml: %v", r.Form["username"][0], err)
-			return
+			log.Printf("Error while reading data from user/%s.xml: %v", r.Form["username"][0], err)
+			addAlertCreate(5, "Internal error with login")
+			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
 		}
 		er := xml.Unmarshal(data, &currentUser)
 		if er != nil {
-			log.Printf("Error while parsing xml users/%s.xml: %v", r.Form["username"][0], er)
-			return
+			log.Printf("Error while parsing xml user/%s.xml: %v", r.Form["username"][0], er)
+			addAlertCreate(5, "Internal error with login")
+			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
 		}
 		addAlertCreate(3, "Succesful login")
 		addAlertCreate(2, "Logged in as user: "+currentUser.Username)
