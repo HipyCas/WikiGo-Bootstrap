@@ -260,18 +260,21 @@ func removeAlert(index int) {
 var currentUser User = User{}
 
 type User struct {
-	Username    string `xml:"username"`
-	Password    string `xml:"password"`
-	Name        string `xml:"name"`
-	LastName    string `xml:"lastName"`
-	Email       string `xml:"email"`
-	PhoneNumber string `xml:"phoneNumber"`
-	Address     Adress `xml:"address"`
-	Language    string `xml:"lang"`
-	About       []byte `xml:"about"`
-	Config      Config `xml:"config"`
-	Other       []byte `xml:",any"`
-	Comments    []byte `xml:",comments"`
+	Username     string  `xml:"username"`
+	Password     string  `xml:"password"`
+	Name         string  `xml:"name"`
+	LastName     string  `xml:"lastName"`
+	Email        string  `xml:"email"`
+	PhoneNumber  string  `xml:"phoneNumber"`
+	Address      Address `xml:"address"`
+	Language     string  `xml:"language"`
+	LanguageCode string  `xml:"languageCode"`
+	Country      string  `xml:"country"`
+	CountryCode  string  `xml:"countryCode"`
+	About        []byte  `xml:"about"`
+	Config       Config  `xml:"config"`
+	Other        []byte  `xml:",any"`
+	Comments     []byte  `xml:",comments"`
 }
 
 type Address struct {
