@@ -129,6 +129,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			addAlertCreate(4, "Your password is too weak")
 		}
 		//log.Printf("Created alert: %s", a.Msg)
+		log.Print(currentUser)
 		http.Redirect(w, r, "/view/TestPage", http.StatusFound)
 	}
 }

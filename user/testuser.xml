@@ -1,0 +1,17 @@
+<user>
+  <username>TestUser</username>
+  <password>nu3rn4er4o5n43n53nrn457ehf734eyh</password>
+  <name>User</name>
+  <lastName>Test</lastName>
+  <email>testuser@example.com</email>
+  <phoneNumber>984321432</phoneNumber>
+  <adress>
+    <number>2</number>
+    <street>Main Stree</street>
+    <city>Belleville</city>
+    <zip>15009</zip>
+    <province>Ontario</province>
+    <country>Canada</country>
+  </adress>
+  <about>Hey this is a simple user to do some testing</about>
+</user>
