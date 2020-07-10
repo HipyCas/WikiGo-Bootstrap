@@ -17,23 +17,25 @@ var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.
 var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
 type ViewData struct {
-	Alerts []Alert
+	Alerts      []Alert
+	CurrentUser *User
 }
 
 type PageViewData struct {
-	Alerts   []Alert
-	WikiPage *Page
+	Alerts      []Alert
+	CurrentUser *User
+	WikiPage    *Page
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts()})
+	err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts(), CurrentUser: &currentUser})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func renderPageTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	view := PageViewData{Alerts: getAlerts(), WikiPage: p}
+	view := PageViewData{Alerts: getAlerts(), CurrentUser: &currentUser, WikiPage: p}
 	err := templates.ExecuteTemplate(w, tmpl+".html", view)
 	log.Println(view)
 	if err != nil {
