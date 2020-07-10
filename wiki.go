@@ -227,6 +227,8 @@ func removeAlert(index int) {
 	alerts = alerts[:len(alerts)-1]
 }
 
+var currentUser User = User{}
+
 type User struct {
 	Username    string `xml:"username"`
 	Password    string `xml:"password"`
