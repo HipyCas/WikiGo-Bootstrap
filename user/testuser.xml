@@ -5,14 +5,14 @@
   <lastName>Test</lastName>
   <email>testuser@example.com</email>
   <phoneNumber>984321432</phoneNumber>
-  <adress>
+  <address>
     <number>2</number>
     <street>Main Stree</street>
     <city>Belleville</city>
     <zip>15009</zip>
     <province>Ontario</province>
     <country>Canada</country>
-  </adress>
+  </address>
   <lang>en</lang>
   <about>Hey this is a simple user to do some testing</about>
   <config></config>
