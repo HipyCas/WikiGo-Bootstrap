@@ -1,18 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
+	"time"
 	"unicode/utf8"
 )
 
 var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
 
-var pagePath = regexp.MustCompile("^/(view|edit|save)/([a-zA-Z0-9]+)$")
+var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
 type ViewData struct {
 	Alerts []Alert
@@ -82,6 +84,14 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+func downloadHandler(w http.ResponseWriter, r *http.Request, title string) {
+	w.Header().Add("Content-Disposition", "Attachement")
+	p, _ := loadPage(title)
+	http.ServeContent(w, r, title, time.Now(), bytes.NewReader(p.Body))
+	log.Printf("Downloaded page %s as txt", p.Title)
+	http.Redirect(w, r, "/view/"+title, http.StatusOK)
+}
+
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		renderTemplate(w, "login")
@@ -118,6 +128,7 @@ func main() {
 	http.HandleFunc("/view/", makePageHandler(viewHandler))
 	http.HandleFunc("/edit/", makePageHandler(editHandler))
 	http.HandleFunc("/save/", makePageHandler(saveHandler))
+	http.HandleFunc("/download/", makePageHandler(downloadHandler))
 	http.HandleFunc("/login/", loginHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
