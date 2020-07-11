@@ -11,10 +11,11 @@ import (
 	"os"
 	"regexp"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
+var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
 
 var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
@@ -94,6 +95,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.ServeContent(w, r, title, time.Now(), bytes.NewReader(p.Body))
 	log.Printf("Downloaded page %s as txt", p.Title)
 	http.Redirect(w, r, "/view/"+title, http.StatusOK)
+	return
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -143,6 +145,72 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func registerHandle(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		renderTemplate(w, "register")
+	} else {
+		r.ParseForm()
+		if r.Form.Get("password") != r.Form.Get("passwordRepeat") {
+			log.Printf("The passwords %s and %s do not match", r.Form.Get("password"), r.Form.Get("repeatPassword"))
+			addAlertCreate(5, "The passwords do match")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+		}
+		valid, message := isValidPassword(r.Form.Get("password"))
+		if !valid {
+			log.Printf("The password %s is not valid: %s", r.Form["password"][0], message)
+			addAlertCreate(5, message)
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+			return
+		}
+		_, err := os.Open("user/" + r.Form["username"][0] + ".xml")
+		if err == nil {
+			log.Printf("Username %s already exists: %v", r.Form.Get("username"), err)
+			addAlertCreate(5, "Username not available")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+			return
+		}
+		user := User{Username: r.Form.Get("username") /*FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"),*/, Password: r.Form.Get("password"), Email: r.Form.Get("email") /*, PhoneNumber: r.Form.Get("phoneNumber"), Country: r.Form.Get("country")*/}
+		out, err := xml.MarshalIndent(user, " ", "\t")
+		if err != nil {
+			log.Printf("Error when generating XML for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		_, err = os.Stdout.Write([]byte(xml.Header))
+		if err != nil {
+			log.Printf("Error when writing XML header to console for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		_, err = os.Stdout.Write(out)
+		if err != nil {
+			log.Printf("Error when writing XML to console for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		err = ioutil.WriteFile("user/"+user.Username+".xml", out, os.ModePerm)
+		if err != nil {
+			log.Printf("Error when wsaving XML to file user/%s.xml for user %v: %v", user.Username, user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		addAlertCreate(3, "Succesfully created account!")
+		addAlertCreate(2, "Login now to access it")
+		http.Redirect(w, r, "/login/", http.StatusFound)
+	}
+}
+
 func makePageHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := pagePath.FindStringSubmatch(r.URL.Path)
@@ -160,6 +228,7 @@ func main() {
 	http.HandleFunc("/save/", makePageHandler(saveHandler))
 	http.HandleFunc("/download/", makePageHandler(downloadHandler))
 	http.HandleFunc("/login/", loginHandler)
+	http.HandleFunc("/register/", registerHandle)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -242,12 +311,11 @@ func addAlertCreate(lvl int, msg string) (Alert, error) {
 func getAlerts() []Alert {
 	toReturn := []Alert{}
 	for i := 0; i < len(alerts); i++ {
-		if alerts[i].Level == -1 {
-			break
-		}
 		log.Printf("Got alert of msg: %s and level %d", alerts[i].Msg, alerts[i].Level)
 		toReturn = append(toReturn, alerts[i])
-		removeAlert(i)
+	}
+	for j := 0; j < len(alerts); j++ {
+		removeAlert(j)
 	}
 	return toReturn
 }
@@ -260,21 +328,22 @@ func removeAlert(index int) {
 var currentUser User = User{}
 
 type User struct {
-	Username     string  `xml:"username"`
-	Password     string  `xml:"password"`
-	Name         string  `xml:"name"`
-	LastName     string  `xml:"lastName"`
-	Email        string  `xml:"email"`
-	PhoneNumber  string  `xml:"phoneNumber"`
-	Address      Address `xml:"address"`
-	Language     string  `xml:"language"`
-	LanguageCode string  `xml:"languageCode"`
-	Country      string  `xml:"country"`
-	CountryCode  string  `xml:"countryCode"`
-	About        []byte  `xml:"about"`
-	Config       Config  `xml:"config"`
-	Other        []byte  `xml:",any"`
-	Comments     []byte  `xml:",comments"`
+	XMLName      xml.Name `xml:"user"`
+	Username     string   `xml:"username"`
+	Password     string   `xml:"password"`
+	FirstName    string   `xml:"firstName"`
+	LastName     string   `xml:"lastName"`
+	Email        string   `xml:"email"`
+	PhoneNumber  string   `xml:"phoneNumber"`
+	Address      Address  `xml:"address"`
+	Language     string   `xml:"language"`
+	LanguageCode string   `xml:"languageCode"`
+	Country      string   `xml:"country"`
+	CountryCode  string   `xml:"countryCode"`
+	About        []byte   `xml:"about"`
+	Config       Config   `xml:"config"`
+	Other        []byte   `xml:",any"`
+	Comments     []byte   `xml:",comments"`
 }
 
 type Address struct {
@@ -287,3 +356,50 @@ type Address struct {
 }
 
 type Config struct{}
+
+func isValidPassword(password string) (ok bool, msg string) {
+	var (
+		upp, low, num bool
+		tot           int
+	)
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			upp = true
+			tot++
+		case unicode.IsLower(char):
+			low = true
+			tot++
+		case unicode.IsDigit(char):
+			num = true
+			tot++
+			/*
+				case unicode.IsSymbol(char):
+					sym = true
+					tot++
+				default:
+					return false, "Invalid character on password (only unicode characaters accepted)"*/
+		}
+	}
+
+	if !upp {
+		msg = "Password must include at least one uppercase letter"
+		ok = false
+	} else if !low {
+		msg = "Password must include at least one lowercase letter"
+		ok = false
+	} else if !num {
+		msg = "Password must include at least one digit/number"
+		ok = false
+		/*} else if !sym {
+		msg = "Password must include at least one symbol"
+		ok = false*/
+	} else if tot < 8 {
+		msg = "Password must be longer than 8"
+		ok = false
+	} else {
+		msg = ""
+		ok = true
+	}
+	return
+}
