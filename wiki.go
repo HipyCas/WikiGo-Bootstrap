@@ -181,6 +181,8 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
 			return
 		}
+		addAlertCreate(3, "Succesfully created account!")
+		addAlertCreate(2, "Login now to access it")
 		http.Redirect(w, r, "/login/", http.StatusFound)
 	}
 }
@@ -285,12 +287,11 @@ func addAlertCreate(lvl int, msg string) (Alert, error) {
 func getAlerts() []Alert {
 	toReturn := []Alert{}
 	for i := 0; i < len(alerts); i++ {
-		if alerts[i].Level == -1 {
-			break
-		}
 		log.Printf("Got alert of msg: %s and level %d", alerts[i].Msg, alerts[i].Level)
 		toReturn = append(toReturn, alerts[i])
-		removeAlert(i)
+	}
+	for j := 0; j < len(alerts); j++ {
+		removeAlert(j)
 	}
 	return toReturn
 }
