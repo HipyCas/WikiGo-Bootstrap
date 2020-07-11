@@ -94,6 +94,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.ServeContent(w, r, title, time.Now(), bytes.NewReader(p.Body))
 	log.Printf("Downloaded page %s as txt", p.Title)
 	http.Redirect(w, r, "/view/"+title, http.StatusOK)
+	return
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -156,6 +157,14 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
+		_, err = os.Open("user/" + r.Form["username"][0] + ".xml")
+		if err == nil {
+			log.Printf("Username %s already exists: %v", r.Form.Get("username"), err)
+			addAlertCreate(5, "Username not available")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/login/", http.StatusFound)
+			return
+		}
 		user := User{Username: r.Form.Get("username"), FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"), Password: r.Form.Get("password"), Email: r.Form.Get("email"), PhoneNumber: r.Form.Get("phoneNumber"), Country: r.Form.Get("country")}
 		out, err := xml.MarshalIndent(user, " ", "\t")
 		if err != nil {
@@ -167,7 +176,7 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = os.Stdout.Write([]byte(xml.Header))
 		if err != nil {
-			log.Printf("Error when saving XML for user %v: %v", user, err)
+			log.Printf("Error when writing XML header to console for user %v: %v", user, err)
 			addAlertCreate(5, "Internal server error while registering")
 			r.Header.Set("Method", "GET")
 			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
@@ -175,7 +184,15 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = os.Stdout.Write(out)
 		if err != nil {
-			log.Printf("Error when writing XML for user %v: %v", user, err)
+			log.Printf("Error when writing XML to console for user %v: %v", user, err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
+			return
+		}
+		err = ioutil.WriteFile("user/"+user.Username+".xml", out, os.ModePerm)
+		if err != nil {
+			log.Printf("Error when wsaving XML to file user/%s.xml for user %v: %v", user.Username, user, err)
 			addAlertCreate(5, "Internal server error while registering")
 			r.Header.Set("Method", "GET")
 			http.Redirect(w, r, "/register/", http.StatusInternalServerError)
