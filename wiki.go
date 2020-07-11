@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -149,20 +150,26 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "register")
 	} else {
 		r.ParseForm()
-		err := isValidPassword(r.Form.Get("password"))
-		if err != nil {
-			log.Printf("The password %s is not valid: %v", r.Form["password"][0], err)
-			addAlertCreate(5, err.Error())
+		if r.Form.Get("password") != r.Form.Get("passwordRepeat") {
+			log.Printf("The passwords %s and %s do not match", r.Form.Get("password"), r.Form.Get("repeatPassword"))
+			addAlertCreate(5, "The passwords do match")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+		}
+		valid, message := isValidPassword(r.Form.Get("password"))
+		if !valid {
+			log.Printf("The password %s is not valid: %s", r.Form["password"][0], message)
+			addAlertCreate(5, message)
 			r.Header.Set("Method", "GET")
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
-		_, err = os.Open("user/" + r.Form["username"][0] + ".xml")
+		_, err := os.Open("user/" + r.Form["username"][0] + ".xml")
 		if err == nil {
 			log.Printf("Username %s already exists: %v", r.Form.Get("username"), err)
 			addAlertCreate(5, "Username not available")
 			r.Header.Set("Method", "GET")
-			http.Redirect(w, r, "/login/", http.StatusFound)
+			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
 		user := User{Username: r.Form.Get("username") /*FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"),*/, Password: r.Form.Get("password"), Email: r.Form.Get("email") /*, PhoneNumber: r.Form.Get("phoneNumber"), Country: r.Form.Get("country")*/}
@@ -350,9 +357,49 @@ type Address struct {
 
 type Config struct{}
 
-func isValidPassword(password string) error {
-	if password == "lol" {
-		return fmt.Errorf("lol %s", password)
+func isValidPassword(password string) (ok bool, msg string) {
+	var (
+		upp, low, num bool
+		tot           int
+	)
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			upp = true
+			tot++
+		case unicode.IsLower(char):
+			low = true
+			tot++
+		case unicode.IsDigit(char):
+			num = true
+			tot++
+			/*
+				case unicode.IsSymbol(char):
+					sym = true
+					tot++
+				default:
+					return false, "Invalid character on password (only unicode characaters accepted)"*/
+		}
 	}
-	return nil
+
+	if !upp {
+		msg = "Password must include at least one uppercase letter"
+		ok = false
+	} else if !low {
+		msg = "Password must include at least one lowercase letter"
+		ok = false
+	} else if !num {
+		msg = "Password must include at least one digit/number"
+		ok = false
+		/*} else if !sym {
+		msg = "Password must include at least one symbol"
+		ok = false*/
+	} else if tot < 8 {
+		msg = "Password must be longer than 8"
+		ok = false
+	} else {
+		msg = ""
+		ok = true
+	}
+	return
 }
