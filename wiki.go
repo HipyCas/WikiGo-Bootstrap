@@ -13,6 +13,8 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
@@ -164,7 +166,7 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
-		_, err := os.Open("user/" + r.Form["username"][0] + ".xml")
+		_, err := os.Open("user/" + r.Form.Get("username") + ".xml")
 		if err == nil {
 			log.Printf("Username %s already exists: %v", r.Form.Get("username"), err)
 			addAlertCreate(5, "Username not available")
@@ -172,7 +174,17 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
-		user := User{Username: r.Form.Get("username") /*FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"),*/, Password: r.Form.Get("password"), Email: r.Form.Get("email") /*, PhoneNumber: r.Form.Get("phoneNumber"), Country: r.Form.Get("country")*/}
+		user := User{Username: r.Form.Get("username") /*FirstName: r.Form.Get("firstName"), LastName: r.Form.Get("lastName"),*/, Email: r.Form.Get("email") /*, PhoneNumber: r.Form.Get("phoneNumber"), Country: r.Form.Get("country")*/}
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.Form.Get("password")), bcrypt.DefaultCost)
+		if err != nil {
+			log.Printf("Error when hasing password %s: %v", r.Form.Get("password"), err)
+			log.Fatal(err)
+			addAlertCreate(5, "Internal server error while registering")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+			return
+		}
+		user.Password = passwordHash
 		out, err := xml.MarshalIndent(user, " ", "\t")
 		if err != nil {
 			log.Printf("Error when generating XML for user %v: %v", user, err)
@@ -330,7 +342,7 @@ var currentUser User = User{}
 type User struct {
 	XMLName      xml.Name `xml:"user"`
 	Username     string   `xml:"username"`
-	Password     string   `xml:"password"`
+	Password     []byte   `xml:"password"`
 	FirstName    string   `xml:"firstName"`
 	LastName     string   `xml:"lastName"`
 	Email        string   `xml:"email"`
