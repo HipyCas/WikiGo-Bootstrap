@@ -136,6 +136,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/login/", http.StatusInternalServerError)
 			return
 		}
+		if err := bcrypt.CompareHashAndPassword(currentUser.Password, []byte(r.Form.Get("password"))); err != nil {
+			log.Printf("Password %s is not correct for user %v: %v", r.Form.Get("password"), currentUser, err)
+			currentUser = User{}
+			log.Printf("--> Current user cleared: %v", currentUser)
+			addAlertCreate(5, "Incorrect password")
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/login/", http.StatusFound)
+			return
+		}
 		addAlertCreate(3, "Succesful login")
 		addAlertCreate(2, "Logged in as user: "+currentUser.Username)
 		if utf8.RuneCountInString(r.Form["password"][0]) < 5 {
