@@ -1,0 +1,37 @@
+**_SHORT_DESCRIPTION_OF_CHANGES_**
+
+### _GO_CODE_MODIFICATIONS_
+
+~~~~~~~~
+
+```go
+~~~~~~~~
+```
+
+### _TEMPLATES_MODIFICATION_OR_CREATION_
+
+~~~~~~~~
+
+```html
+~~~~~~~~
+```
+
+### Solved issues
+
+#### Fixed #
+
+_EXPLANATION_OF_ISSUE_AND_HOW_IT_WAS_SOLVED_
+
+#### _MORE_ISSUES_IF_SOLVED_
+
+### New issues
+
+#### Issue #
+
+_SHORT_EXPLANATION_ABOUT_WHAT_IT_IS_HOW_IT_APPEARED_WHEN_IT_APPEARED_AND_WHERE_IT_APPEARED_
+
+#### _MORE_ISSUES_IF_APPEARED
+
+### Next steps on _GROUP_THEME_OF_THE_ISSUE_
+
+_WHAT_IS_NEXT
