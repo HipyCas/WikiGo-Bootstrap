@@ -169,7 +169,7 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
 		}
-		if r.Form.Get("password") != r.Form.Get("passwordRepeat") {
+		if r.Form.Get("password") != r.Form.Get("repeatPassword") {
 			log.Printf("The passwords %s and %s do not match", r.Form.Get("password"), r.Form.Get("repeatPassword"))
 			addAlertCreate(5, "The passwords do match")
 			r.Header.Set("Method", "GET")
