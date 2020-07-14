@@ -161,16 +161,17 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "register")
 	} else {
 		r.ParseForm()
-		if r.Form.Get("password") != r.Form.Get("passwordRepeat") {
-			log.Printf("The passwords %s and %s do not match", r.Form.Get("password"), r.Form.Get("repeatPassword"))
-			addAlertCreate(5, "The passwords do match")
-			r.Header.Set("Method", "GET")
-			http.Redirect(w, r, "/register/", http.StatusFound)
-		}
 		valid, message := isValidPassword(r.Form.Get("password"))
 		if !valid {
 			log.Printf("The password %s is not valid: %s", r.Form["password"][0], message)
 			addAlertCreate(5, message)
+			r.Header.Set("Method", "GET")
+			http.Redirect(w, r, "/register/", http.StatusFound)
+			return
+		}
+		if r.Form.Get("password") != r.Form.Get("passwordRepeat") {
+			log.Printf("The passwords %s and %s do not match", r.Form.Get("password"), r.Form.Get("repeatPassword"))
+			addAlertCreate(5, "The passwords do match")
 			r.Header.Set("Method", "GET")
 			http.Redirect(w, r, "/register/", http.StatusFound)
 			return
