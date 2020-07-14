@@ -16,5 +16,7 @@ wiki
 # vendor/
 
 # Test files
-page/TestPage.txt
-user/testuser.xml
+# page/TestPage.txt
+# user/testuser.xml
+*Test*
+*test*
