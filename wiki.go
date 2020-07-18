@@ -97,7 +97,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.ServeContent(w, r, title, time.Now(), bytes.NewReader(p.Body))
 	log.Printf("Downloaded page %s as txt", p.Title)
 	http.Redirect(w, r, "/view/"+title, http.StatusOK)
-	return
+	//return
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +156,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func registerHandle(w http.ResponseWriter, r *http.Request) {
+func registerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		renderTemplate(w, "register")
 	} else {
@@ -233,6 +233,14 @@ func registerHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print("Succesfully loged out user %v", currentUser)
+	currentUser = User{}
+	addAlertCreate(3, "Succesfully loged out")
+	http.Redirect(w, r, "/login/", http.StatusFound)
+	//return
+}
+
 func makePageHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := pagePath.FindStringSubmatch(r.URL.Path)
@@ -250,7 +258,8 @@ func main() {
 	http.HandleFunc("/save/", makePageHandler(saveHandler))
 	http.HandleFunc("/download/", makePageHandler(downloadHandler))
 	http.HandleFunc("/login/", loginHandler)
-	http.HandleFunc("/register/", registerHandle)
+	http.HandleFunc("/register/", registerHandler)
+	http.HandleFunc("/logout/", logoutHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
