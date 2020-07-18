@@ -20,3 +20,6 @@ wiki
 # user/testuser.xml
 *Test*
 *test*
+
+# Compressed files for releases
+required.*
