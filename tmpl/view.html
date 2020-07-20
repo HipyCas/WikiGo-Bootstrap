@@ -1,9 +1,5 @@
 <html>
-  <head>
-    {{ template "cdn" }}
-    {{ template "meta"}}
-    <title>{{ .WikiPage.Title }}</title>
-  </head>
+  {{ template "head" .WikiPage }}
   <body>
     <div class="container">
       <br>{{ template "alerts" . }}
