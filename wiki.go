@@ -17,13 +17,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html"))
+var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html", "tmpl/sub/head.html"))
 
 var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
 type ViewData struct {
 	Alerts      []Alert
 	CurrentUser *User
+	Title       string
 }
 
 type PageViewData struct {
@@ -32,8 +33,8 @@ type PageViewData struct {
 	WikiPage    *Page
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts(), CurrentUser: &currentUser})
+func renderTemplate(w http.ResponseWriter, tmpl string, title string) {
+	err := templates.ExecuteTemplate(w, tmpl+".html", ViewData{Alerts: getAlerts(), CurrentUser: &currentUser, Title: title})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -102,7 +103,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request, title string) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		renderTemplate(w, "login")
+		renderTemplate(w, "login", "Login")
 	} else {
 		r.ParseForm()
 		if m, _ := regexp.MatchString("^[a-zA-Z0-9]+$", r.Form.Get("username")); !m {
@@ -158,7 +159,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		renderTemplate(w, "register")
+		renderTemplate(w, "register", "Register")
 	} else {
 		r.ParseForm()
 		valid, message := isValidPassword(r.Form.Get("password"))
