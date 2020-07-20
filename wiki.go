@@ -253,6 +253,9 @@ func makePageHandler(fn func(http.ResponseWriter, *http.Request, string)) http.H
 }
 
 func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/view/FrontPage", http.StatusFound)
+	})
 	http.HandleFunc("/view/", makePageHandler(viewHandler))
 	http.HandleFunc("/edit/", makePageHandler(editHandler))
 	http.HandleFunc("/save/", makePageHandler(saveHandler))
