@@ -1,0 +1,26 @@
+{{ define "navbar" }}
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/view/front-page">WikiGo</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" ara-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse">
+    <div class="navbar-nav">
+      {{ if eq .Title "Front Page"}}<a href="/front-page" class="nav-item nav-link active">Home</a>
+      {{ else }}<a href="/popular" class="nav-item nav-link">Home</a>{{ end }}
+      {{ if eq .Title "Popular"}}<a href="/popular" class="nav-item nav-link active">Popular</a>
+      {{ else }}<a href="/popular" class="nav-item nav-link">Popular</a>{{ end }}
+      {{ if eq .Title "New"}}<a href="/new" class="nav-item nav-link active">New</a>
+      {{ else }}<a href="/new" class="nav-item nav-link">New</a>{{ end }}
+    </div>
+    <form action="/search" class="form-inline">
+      <div class="input-group">
+        <input type="search" class="form-control" placeholder="Search" aria-label="Page name">
+        <div class="input-group-apend">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</nav>
+{{ end }}
