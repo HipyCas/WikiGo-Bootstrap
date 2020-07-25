@@ -11,4 +11,5 @@ require (
 	github.com/stripe/safesql v0.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/tools v0.0.0-20200715235423-130c9f19d3fe // indirect
+	mvdan.cc/unparam v0.0.0-20200501210554-b37ab49443f7 // indirect
 )
