@@ -1,6 +1,7 @@
 <html>
   {{ template "head" .WikiPage }}
   <body>
+    {{ template "navbar" .WikiPage }}
     <div class="container">
       <br>{{ template "alerts" . }}
       <h1>{{ .WikiPage.Title }}</h1>

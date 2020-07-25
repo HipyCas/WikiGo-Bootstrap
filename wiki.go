@@ -17,7 +17,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html", "tmpl/sub/head.html"))
+var templates = template.Must(template.ParseFiles("tmpl/login.html", "tmpl/register.html", "tmpl/edit.html", "tmpl/view.html", "tmpl/sub/cdn.html", "tmpl/sub/meta.html", "tmpl/sub/alerts.html", "tmpl/sub/head.html", "tmpl/sub/navbar.html"))
 
 var pagePath = regexp.MustCompile("^/(view|edit|save|download)/([a-zA-Z0-9]+)$")
 
