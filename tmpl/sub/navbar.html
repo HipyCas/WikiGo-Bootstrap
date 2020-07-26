@@ -1,12 +1,12 @@
 {{ define "navbar" }}
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container">
-    <a class="navbar-brand" href="/view/front-page">WikiGo</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" ara-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand" href="/view/FrontPage">WikiGo</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <div class="navbar-nav">
+      <div class="navbar-nav mr-auto mt-2 mt-md-0">
         {{ if eq .Title "FrontPage"}}<a href="/front-page" class="nav-item nav-link active">Home</a>
         {{ else }}<a href="/popular" class="nav-item nav-link">Home</a>{{ end }}
         {{ if eq .Title "Popular"}}<a href="/popular" class="nav-item nav-link active">Popular</a>
@@ -14,10 +14,10 @@
         {{ if eq .Title "New"}}<a href="/new" class="nav-item nav-link active">New</a>
         {{ else }}<a href="/new" class="nav-item nav-link">New</a>{{ end }}
       </div>
-        <form action="/search" method="get" class="form-inline my-2 my-md-0">
-          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+      <form action="/search" method="get" class="form-inline my-2 my-md-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
     </div>
   </div>
 </nav>
